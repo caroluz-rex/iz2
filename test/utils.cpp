@@ -6,7 +6,7 @@
 
 
 extern "C" {
-#include "DZ2/utils.h"
+#include "utils.h"
 }
 
 //TEST(create_database, ok){
