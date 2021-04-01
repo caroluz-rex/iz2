@@ -1,50 +1,47 @@
-//
-// Created by Dashik on 23.10.2020.
-//
-#include "../include/DZ2/without_fork.h"
-#include "../include/DZ2/utils.h"
+#include "../include/without_fork.h"
+#include "../include/utils.h"
 
-struct List* select_the_most(struct List *list){
-    int i = 0;
-    if (!list)
+struct Database* single_process_work (struct Database *database) {
+    if (!database) {
         return NULL;
-    struct List *criterion_list = create_list(sizeof(struct Staffs));
-    struct List *position_list = create_list(sizeof(char*));
-    while (i < list->size) {
-        struct Staffs *curr_staff = element_get(list, i);
-        if (is_position_was(curr_staff, position_list) == 1) {
-            int j = i + 1;
-            unsigned char max = curr_staff->age;
-            unsigned char min = curr_staff->age;
-            struct List *index_max = create_list(sizeof(int));
-            struct List *index_min = create_list(sizeof(int));
-            int curr_index = i;
-            add_to_index((void*)&curr_index, index_max);
-            add_to_index((void*)&curr_index, index_min);
-            if (j < list->size) {
-                while (j < list->size) {
-                    struct Staffs *check_staff = element_get(list, j);
-                    if (strcmp(curr_staff->position, check_staff->position) == 0) {
-                        max = compare_staff_max(max, check_staff->age, j, &index_max);
-                        min = compare_staff_min(min, check_staff->age, j, &index_min);
+    }
+    struct Database *workers_on_pos;
+    struct Database *position_list = create_database(sizeof(char *));
+    struct Database *report = create_database(sizeof(struct Report *));
+    struct Report* salary_report;
+    for (int i = 0; i < database->size; i++) {
+        check_position(database->data[i], position_list);
+    }
+        unsigned char min = 0;
+        unsigned char max = 0;
+        unsigned char cur_exp = 0;
+        char *current_pos = "";
+        int workers_count = 0;
+        unsigned int sum_salary = 0;
+        float avg_salary = 0;
+        struct Worker *current_staff = NULL;
+        for (int t = 0; t < position_list->size; t++) {
+            current_pos = get_record(position_list, t);
+            workers_on_pos = workers_on_position(database, current_pos);
+            max = find_max_exp(workers_on_pos);
+            min = find_min_exp(workers_on_pos);
+            for (int k = min; k <= max; k++) {
+                for (int j = 0; j < workers_on_pos->size; j++) {
+                    current_staff = get_record(workers_on_pos, j);
+                    if (current_staff->work_experience == k) {
+                        sum_salary += current_staff->salary;
+                        workers_count++;
                     }
-                    ++j;
+                    cur_exp = k;
+                }
+                if (workers_count != 0) {
+                    salary_report = create_report(current_pos, avg_salary, cur_exp);
+                    avg_salary = (float)sum_salary / (float)workers_count;
+                    add_to_database(salary_report, report);
+                    sum_salary = 0;
+                    workers_count = 0;
                 }
             }
-            if (max == min){
-                create_crit_list(index_max, criterion_list, list);
-            }
-            else{
-                create_crit_list(index_max, criterion_list, list);
-                create_crit_list(index_min, criterion_list, list);
-            }
-            remote_index(index_max);
-            remote_index(index_min);
         }
-        ++i;
+        return report;
     }
-    remote_list(position_list);
-    sorted_list(criterion_list);
-    return criterion_list;
-};
-

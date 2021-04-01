@@ -9,38 +9,38 @@ extern "C" {
 #include "DZ2/utils.h"
 }
 
-//TEST(create_list, ok){
-//    struct List *list = nullptr;
-//    list = create_list(sizeof(struct Staffs));
+//TEST(create_database, ok){
+//    struct Database *list = nullptr;
+//    list = create_database(sizeof(struct Worker));
 //    EXPECT_NE(list, nullptr);
 //}
 
-//TEST(create_database, ok){
+//TEST(load_base_from_file, ok){
 //    FILE* input_file = fopen("../../test1.txt", "r+");
-//    struct List *list = create_database(input_file);
+//    struct Database *list = load_base_from_file(input_file);
 //    EXPECT_NE(list, nullptr);
 //}
 //
 //TEST(create_staff, ok){
 //    char string_helper_ptr[MAX_STRING_SIZE] = "";
 //    FILE* input_file = fopen("../../test1.txt", "r+");
-//    auto *new_staff = static_cast<Staffs *>(malloc(sizeof(struct Staffs)));
-//    new_staff->name = input_info_ptr(input_file, string_helper_ptr);
+//    auto *new_staff = static_cast<Worker *>(malloc(sizeof(struct Worker)));
+//    new_staff->name = scan_to_pointer(input_file, string_helper_ptr);
 //    std::string name = new_staff->name;
 //    EXPECT_EQ(name, "Ivan");
-//    new_staff->surname = input_info_ptr(input_file, string_helper_ptr);
+//    new_staff->surname = scan_to_pointer(input_file, string_helper_ptr);
 //    std::string surname = new_staff->surname;
 //    EXPECT_EQ(surname, "Ivanov");
-//    new_staff->gender = input_info_value(input_file, string_helper_ptr);
-//    EXPECT_EQ(new_staff->gender, 'm');
-//    new_staff->age = input_info_value(input_file, string_helper_ptr);
+//    new_staff->sex = scan_to_value(input_file, string_helper_ptr);
+//    EXPECT_EQ(new_staff->sex, 'm');
+//    new_staff->age = scan_to_value(input_file, string_helper_ptr);
 //    EXPECT_EQ(new_staff->age, 50);
-//    new_staff->salary = input_info_int(input_file, string_helper_ptr);
+//    new_staff->salary = scan_to_int(input_file, string_helper_ptr);
 //    unsigned int salary = new_staff->salary;
 //    EXPECT_EQ(salary, 45000);
-//    new_staff->position = input_info_ptr(input_file, string_helper_ptr);
+//    new_staff->position = scan_to_pointer(input_file, string_helper_ptr);
 //    std::string position = new_staff->position;
 //    EXPECT_EQ(position, "headmanager");
-//    new_staff->experience = input_info_value(input_file, string_helper_ptr);
-//    EXPECT_EQ(new_staff->experience, 8);
+//    new_staff->work_experience = scan_to_value(input_file, string_helper_ptr);
+//    EXPECT_EQ(new_staff->work_experience, 8);
 //}

@@ -1,202 +1,190 @@
-//
-// Created by Dashik on 29.10.2020.
-//
+#include "utils.h"
 
-#include "DZ2/utils.h"
-
-struct List *create_list(int size_of_data) {
-    struct List *list = NULL;
-    list = (struct List*)malloc(sizeof(struct List));
-    if (list == NULL)
+struct Database *create_database(int size_of_data) {
+    struct Database *database = NULL;
+    database = (struct Database*)malloc(sizeof(struct Database));
+    if (database == NULL)
         return NULL;
-    list->capacity = CAPACITY_OF_LIST;
-    list->size = 0;
-    list->element_size = size_of_data;
-    list->data = (void **)malloc(CAPACITY_OF_LIST*sizeof(void*));
-    if (!list->data)
+    database->capacity = CAPACITY_OF_DATABASE;
+    database->size = 0;
+    database->element_size = size_of_data;
+    database->data = (void **)malloc(CAPACITY_OF_DATABASE*sizeof(void*));
+    if (!database->data)
         return NULL;
-    return list;
+    return database;
 };
 
-struct List *create_database(FILE *file_inp){
+struct Database *load_base_from_file(FILE *data_file){
     char string_helper_ptr[MAX_STRING_SIZE] = "";
-    struct List *list = create_list(sizeof(struct Staffs));
-    while (!feof(file_inp)){
-        struct Staffs *new_staff = malloc(sizeof(struct Staffs));
-        if (!new_staff)
+    struct Database *database = create_database(sizeof(struct Worker));
+    while (!feof(data_file)){
+        struct Worker *new_worker = malloc(sizeof(struct Worker));
+        if (!new_worker)
             return NULL;
-        new_staff->name = input_info_ptr(file_inp, string_helper_ptr);
-        new_staff->surname = input_info_ptr(file_inp, string_helper_ptr);
-        new_staff->gender = input_info_value(file_inp, string_helper_ptr);
-        new_staff->age = input_info_value(file_inp, string_helper_ptr);
-        new_staff->salary = input_info_int(file_inp, string_helper_ptr);
-        new_staff->position = input_info_ptr(file_inp, string_helper_ptr);
-        new_staff->experience = input_info_value(file_inp, string_helper_ptr);
-        list = add_to_list(new_staff, list);
+        new_worker->name = scan_to_pointer(data_file, string_helper_ptr);
+        new_worker->surname = scan_to_pointer(data_file, string_helper_ptr);
+        new_worker->sex = scan_to_value(data_file, string_helper_ptr);
+        new_worker->age = scan_to_value(data_file, string_helper_ptr);
+        new_worker->salary = scan_to_int(data_file, string_helper_ptr);
+        new_worker->position = scan_to_pointer(data_file, string_helper_ptr);
+        new_worker->work_experience = scan_to_value(data_file, string_helper_ptr);
+        database = add_to_database(new_worker, database);
     }
-    return list;
+    return database;
 };
 
-void remote_database(struct List *list){
-    for (int i=0; i < list->size; ++i){
-        struct Staffs *staffs = element_get(list, i);
-        free(staffs->name);
-        free(staffs->surname);
-        free(staffs->position);
-        free(staffs);
-        staffs = NULL;
+void free_worker(struct Database *database){
+    for (int i=0; i < database->size; ++i){
+        struct Worker *workers = get_record(database, i);
+        free(workers->name);
+        free(workers->surname);
+        free(workers->position);
+        free(workers);
+        workers = NULL;
     }
-    free(list->data);
-    free(list);
+    free(database->data);
+    free(database);
 };
 
-void remote_index(struct List *list){
-    for (int i = 0; i < list->size; ++i)
-        free(list->data[i]);
-    list->size = 0;
-    free(list->data);
-    free(list);
-};
-
-void remote_list(struct List *list){
-    free(list->data);
-    free(list);
+void free_report(struct Database *database){
+    for (int i=0; i < database->size; ++i){
+        struct Report *report_note = get_record(database, i);
+        free(report_note->position);
+        report_note = NULL;
+    }
+    free(database->data);
+    free(database);
 }
 
-char *input_info_ptr(FILE *file_inp, char* string_helper){
-    if (!fscanf(file_inp, "%s", string_helper))
+void free_positions (struct Database *database) {
+    free(database->data);
+    free(database);
+}
+
+char *scan_to_pointer(FILE *file_inp, char* buf){
+    if (!fscanf(file_inp, "%s", buf))
         return NULL;
-    size_t size = strlen(string_helper);
+    size_t size = strlen(buf);
     char* struct_el = (char*)calloc(size + 1, sizeof(char));
-    if (!string_helper){
+    if (!buf){
         return NULL;
     }
-    strncpy(struct_el, string_helper, size);
+    strncpy(struct_el, buf, size);
     return struct_el;
 };
-char input_info_value(FILE *file_inp, char* string_helper){
-    if (!fscanf(file_inp, "%s", string_helper))
+
+char scan_to_value(FILE *file_inp, char* buf){
+    if (!fscanf(file_inp, "%s", buf))
         return 0;
-    if (strcmp(string_helper, MALE) != 0 && strcmp(string_helper, FEMALE) != 0){
-        size_t size = strlen(string_helper);
+    if (strcmp(buf, MALE) != 0 && strcmp(buf, FEMALE) != 0){
+        size_t size = strlen(buf);
         int i = 0;
         int number = 0;
         while (i < size){
-            number = 10 * number + (string_helper[i] - 48);
+            number = 10 * number + (buf[i] - 48);
             ++i;
         }
-        *string_helper = (char)number;
+        *buf = (char)number;
     }
-    return *string_helper;
+    return *buf;
 };
 
-long input_info_int(FILE *file_inp, char* string_helper){
+long scan_to_int(FILE *file_inp, char* buf){
     char *end;
-    if (!fscanf(file_inp, "%s", string_helper))
+    if (!fscanf(file_inp, "%s", buf))
         return 0;
-    return strtol(string_helper, &end, 10);
+    return strtol(buf, &end, 10);
 };
 
-struct List *add_to_list(void *new_staff, struct List *list){
-    if (!new_staff || !list)
+struct Database *add_to_database(void *data, struct Database *database){
+    if (!data || !database)
         return NULL;
-    if (list->size >= list->capacity)
-        list_resize(list, 2 * list->capacity);
-    list->data[list->size] = new_staff;
-    list->size++;
-    return list;
+    if (database->size >= database->capacity)
+        database_resize(database, 2 * database->capacity);
+    database->data[database->size] = data;
+    database->size++;
+    return database;
 };
 
-struct List *add_to_index(void *new_staff, struct List *list){
-    if (!new_staff || !list)
+void database_resize(struct Database *database, int new_capacity){
+    database->capacity = new_capacity;
+    database->data = realloc(database->data, new_capacity * sizeof(void *));
+}
+
+void* get_record(struct Database *database, int index){
+    if (index < 0 || index > database->size - 1 || database->size <= 0)
         return NULL;
-    if (list->size >= list->capacity)
-        list_resize(list, 2 * list->capacity);
-    list->data[list->size] = (void*)malloc(list->element_size);
-    memcpy(list->data[list->size], new_staff, list->element_size);
-    list->size++;
-    return list;
-};
-
-void list_resize(struct List *list, int new_capacity){
-    list->capacity = new_capacity;
-    list->data = realloc(list->data, new_capacity * sizeof(void *));
+    return database->data[index];
 }
 
-void* element_get(struct List *list, int index){
-    if (index < 0 || index > list->size - 1 || list->size <= 0)
-        return NULL;
-    return list->data[index];
-}
-
-void sorted_list(struct List *list){
-    for (int i = 0; i < list->size - 1; ++i){
-        for (int j = 0; j < list->size - i - 1; ++j){
-            struct Staffs *curr_staff = element_get(list, j);
-            struct Staffs *next_staff = element_get(list, j+1);
-            if (strcmp(curr_staff->surname, next_staff->surname) > 0){
-                struct Staffs *tmp = list->data[j];
-                list->data[j] = list->data[j+1];
-                list->data[j+1] = tmp;
-            }
-        }
-    }
-}
-
-int is_position_was(struct Staffs *staff, struct List *list){
-    for (int i = 0; i < list->size; ++i){
-        char *curr_position = element_get(list, i);
-        if (strcmp(staff->position, curr_position) == 0)
+int check_position(struct Worker *worker, struct Database *database){
+    for (int i = 0; i < database->size; ++i){
+        char *curr_position = get_record(database, i);
+        if (strcmp(worker->position, curr_position) == 0)
             return 0;
     }
-    add_to_list(staff->position, list);
+    add_to_database(worker->position, database);
     return 1;
 }
 
-unsigned char compare_staff_max(unsigned char max, unsigned char age, int index, struct List **index_max){
-    if (max == age) {
-        int curr_index = index;
-        add_to_index((void*)&curr_index, *index_max);
+int get_all_positions (struct Worker *worker, struct Database *database, char* position) {
+    if (strcmp(worker->position, position) == 0) {
+        add_to_database(worker, database);
     }
-    if (max < age) {
-        max = age;
-        remote_index(*index_max);
-        *index_max = create_list(sizeof(int));
-        int curr_index = index;
-        add_to_index((void*)&curr_index, *index_max);
+    return 1;
+}
+
+struct Database* add_to_shared_mem_databse(struct Database *generated_base, struct Database *shared_base){
+    shared_base->element_size = 2 * generated_base->element_size;
+    for (int i = 0; i < generated_base->size; i++) {
+        struct Report *worker = get_record(generated_base, i);
+        memcpy(shared_base->data[shared_base->size], worker, shared_base->element_size);
+        shared_base->size++;
+    }
+    return shared_base;
+
+}
+
+struct Report* create_report (char* position, float avg_salary, unsigned char exp) {
+    struct Report* new_note = (struct Report*)malloc(sizeof(struct Report));
+    if (new_note == NULL) {
+        return NULL;
+    }
+    new_note->experience = exp;
+    new_note->position = position;
+    new_note->avg_salary = avg_salary;
+    return new_note;
+}
+
+struct Database* workers_on_position(struct Database *database, char* position){
+    struct Database *workers_pos_database = create_database(sizeof(struct Worker));
+    for (int j = 0; j < database->size; j++) {
+        struct Worker *curr_worker = get_record(database, j);
+        get_all_positions(curr_worker, workers_pos_database, position);
+    }
+    return workers_pos_database;
+};
+
+unsigned int find_max_exp(struct Database *database){
+    unsigned int max=0;
+    struct Worker *current_worker;
+    for (int i=0; i < database->size; i++) {
+        current_worker = get_record(database, i);
+        if (max<=current_worker->work_experience) {
+            max=current_worker->work_experience;
+        }
     }
     return max;
 };
 
-unsigned char compare_staff_min(unsigned char min, unsigned char age, int index, struct List **index_min){
-    if (min == age) {
-        int curr_index = index;
-        add_to_index((void*)&curr_index, *index_min);
-    }
-    if (min > age) {
-        min = age;
-        remote_index(*index_min);
-        *index_min = create_list(sizeof(int));
-        int curr_index = index;
-        add_to_index((void*)&curr_index, *index_min);
+unsigned int find_min_exp(struct Database *database){
+    unsigned int min=UNSIGNED_INT;
+    struct Worker *current_worker;
+    for (int i=0; i < database->size; i++) {
+        current_worker = get_record(database, i);
+        if (min>current_worker->work_experience) {
+            min=current_worker->work_experience;
+        }
     }
     return min;
-}
-
-void create_crit_list(struct List *index_list, struct List *criterion_list, struct List *list){
-    for (int i = 0; i < index_list->size; ++i){
-        int *index = element_get(index_list, i);
-        struct Staffs *max_staff = element_get(list, *index);
-        criterion_list = add_to_list(max_staff, criterion_list);
-    }
-}
-
-struct List* add_to_share_list(struct List *crit_list, struct List *share_list){
-    share_list->element_size = crit_list->element_size;
-    for (int i = 0; i < crit_list->size; ++i) {
-        struct Staffs *staff = element_get(crit_list, i);
-        memcpy(share_list->data[share_list->size], staff, share_list->element_size);
-        share_list->size++;
-    }
-    return share_list;
-}
+};
