@@ -1,4 +1,4 @@
-#include "../include/without_fork.h"
+#include "../include/single.h"
 #include "../include/utils.h"
 
 struct Database* single_process_work (struct Database *database) {

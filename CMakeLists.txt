@@ -23,14 +23,14 @@ enable_testing()
 add_subdirectory(test)
 
 add_library(without_fork STATIC
-        ${PROJECT_SOURCE_DIR}/include/without_fork.h
-        ${PROJECT_SOURCE_DIR}/src/without_fork.c
+        ${PROJECT_SOURCE_DIR}/include/single.h
+        ${PROJECT_SOURCE_DIR}/src/single.c
         ${PROJECT_SOURCE_DIR}/include/utils.h
         ${PROJECT_SOURCE_DIR}/src/utils.c)
 
 add_library(with_fork SHARED
-        ${PROJECT_SOURCE_DIR}/include/with_fork.h
-        ${PROJECT_SOURCE_DIR}/src/with_fork.c
+        ${PROJECT_SOURCE_DIR}/include/multi.h
+        ${PROJECT_SOURCE_DIR}/src/multi.c
         ${PROJECT_SOURCE_DIR}/include/utils.h
         ${PROJECT_SOURCE_DIR}/src/utils.c)
 

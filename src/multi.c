@@ -1,4 +1,4 @@
-#include "../include/with_fork.h"
+#include "../include/multi.h"
 #include "utils.h"
 
 struct Database *shared_memory(int size){

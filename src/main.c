@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <time.h>
-#include "without_fork.h"
-#include "with_fork.h"
+#include "single.h"
+#include "multi.h"
 #include "utils.h"
 #include <time.h>
 #include <sys/time.h>
